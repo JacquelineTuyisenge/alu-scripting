@@ -1,14 +1,10 @@
 #!/usr/bin/python3
-"""
-function that queries'Reddit API' and print titles of first ten hot posts listed for a given subreddit
-"""
+""" print titles of first ten hot posts listed for a given subreddit """
 import requests
 
 
 def top_ten(subreddit)
-    """
-    ten hot posts listed
-    """
+    """ print titles of ten hot posts listed """
 
     url = "https://www.reddit.com/r/{}/about.json".format(subreddit)
     response = requests.get(url, allow_reddits=False)
