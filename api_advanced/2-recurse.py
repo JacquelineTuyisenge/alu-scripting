@@ -9,8 +9,8 @@ def recurse(subreddit, hot_list=[], after=None):
     headers = {'User-Agent': 'Mozilla/5.0'}
     params = {"limit": 100, "after": after}
     response = requests.get(
-                            url, 
-                            headers=headers, 
+                            url,
+                            headers=headers,
                             params=params,
                             allow_redirects=False)
     if response.status_code == 200:
