@@ -1,13 +1,12 @@
 #!/usr/bin/python3
+#!/usr/bin/python3
 """ 3-count.py """
+import json
 import requests
 
 
-def count_words(subreddit, word_list, after=None, word_count={}):
-    """
-    Recursive function that queries the Reddit API, parses the title of all hot articles,
-    and prints a sorted count of given keywords (case-insensitive, delimited by spaces).
-    """
+def count_words(subreddit, word_list, after="", count=[]):
+    """ prints a sorted count of given keywords """
 
     # Base case: when there are no more articles to parse
     if after == '':
