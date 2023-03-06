@@ -1,56 +1,59 @@
 #!/usr/bin/python3
-"""
-3-count.py
-"""
-import json
-import requests
+"""Rwite recursive function and titles oh hot articles."""
+import praw
 
 
-def count_words(subreddit, word_list, after="", count=[]):
-    """ prints a sorted count of given keywords """
+def count_words(subreddit, word_list, count_dict=None, after=None):
+    """
+    Recursive function that queries the Reddit API, parses the title of all hot articles, and prints a sorted count of given
+    keywords. If word_list contains the same word (case-insensitive), the final count should be the sum of each duplicate.
+    Results are printed in descending order, by the count, and if the count is the same for separate keywords, they are sorted
+    alphabetically (ascending, from A to Z). Words with no matches are skipped and not printed. Words must be printed in lowercase.
+    Results are based on the number of times a keyword appears, not titles it appears in. java java java counts as 3 separate occurrences
+    of java.
+    
+    :param subreddit: The subreddit to search
+    :param word_list: A list of words to search for
+    :param count_dict: A dictionary of keyword counts, used for recursive calls
+    :param after: The after parameter for the Reddit API, used for recursive calls
+    :return: None
+    """
+    
+    # Initialize count_dict if it's not passed in
+    if count_dict is None:
+        count_dict = {}
+    
+    # Initialize the Reddit API client
+    reddit = praw.Reddit(client_id='your_client_id',
+                         client_secret='your_client_secret',
+                         user_agent='your_user_agent')
 
-    if count is None:
-        count = []
+    # Make the API call
+    try:
+        subreddit_obj = reddit.subreddit(subreddit)
+        hot_articles = subreddit_obj.hot(limit=100, params={"after": after})
+    except praw.exceptions.Redirect as e:
+        # Invalid subreddit, do nothing
+        return
+    
+    # Loop through the hot articles
+    for article in hot_articles:
+        # Split the title into words and lowercase them
+        words = article.title.lower().split()
 
-    word_count = {}  # Define the word_count dictionary here
-    # Base case: when there are no more articles to parse
-    if after == '':
-        # Sort the word count in descending order by count, and then in ascending order alphabetically
-        sorted_word_count = sorted(word_count.items(), key=lambda x: (-x[1], x[0]))
-        # Print the word count for each keyword
-        for word, count in sorted_word_count:
+        # Loop through the words and update the count_dict for each word in the word_list
+        for word in words:
+            # Strip out periods, exclamation points, and underscores at the end of words
+            word = word.rstrip('.!_')
+            if word in word_list:
+                # Add 1 to the count for the word, ignoring case
+                count_dict[word.lower()] = count_dict.get(word.lower(), 0) + 1
+
+        # Recursively call count_words with the next page of articles
+        count_words(subreddit, word_list, count_dict, article.name)
+
+    # If we've reached the end of the articles, print the results
+    if not after:
+        sorted_counts = sorted(count_dict.items(), key=lambda x: (-x[1], x[0]))
+        for word, count in sorted_counts:
             print(f"{word}: {count}")
-        return
-
-    # Set up the parameters for the API request
-    url = f"https://www.reddit.com/r/{subreddit}/hot.json"
-    headers = {"User-Agent": "Mozilla/5.0"}
-    params = {"limit": 100}
-    if after:
-        params["after"] = after
-
-    # Make the API request
-    response = requests.get(url, headers=headers, params=params)
-    if response.status_code != 200:
-        print(f"Error {response.status_code}: Could not fetch data from Reddit API")
-        return
-
-    # Parse the JSON data in the response
-    data = response.json()
-
-    # Extract the titles of the articles and count the occurrence of each keyword
-    for post in data["data"]["children"]:
-        title = post["data"]["title"]
-        for word in word_list:
-            # Check if the word appears in the title (case-insensitive)
-            # You may need to modify this check to exclude words that contain the keyword (e.g. java. or java!)
-            if word.lower() in title.lower():
-                # Add the count to the word count dictionary
-                if word.lower() in word_count:
-                    word_count[word.lower()] += title.lower().count(word.lower())
-                else:
-                    word_count[word.lower()] = title.lower().count(word.lower())
-
-    # Recursively call the function with the next "after" parameter to get the next set of articles
-    after = data["data"]["after"]
-    count_words(subreddit, word_list, after, word_count)
