@@ -1,6 +1,7 @@
 #!/usr/bin/python3
-
-""" 3-count.py """
+"""
+3-count.py
+"""
 import json
 import requests
 
@@ -8,6 +9,10 @@ import requests
 def count_words(subreddit, word_list, after="", count=[]):
     """ prints a sorted count of given keywords """
 
+    if count is None:
+        count = []
+
+    word_count = {}  # Define the word_count dictionary here
     # Base case: when there are no more articles to parse
     if after == '':
         # Sort the word count in descending order by count, and then in ascending order alphabetically
