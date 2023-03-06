@@ -1,10 +1,14 @@
 #!/usr/bin/python3
-""" write recursive functions and list of hot articles """
+"""
+write recursive functions and list of hot articles
+"""
 import requests
 
 
 def recurse(subreddit, hot_list=[], after=None):
-    """ returns list with titles of hot articles """
+    """
+    returns list with titles of hot articles
+    """
     url = f"https://www.reddit.com/r/{subreddit}/hot.json"
     headers = {"User-Agent": "Mozilla/5.0"}
     params = {"limit": 100, "after": after}
